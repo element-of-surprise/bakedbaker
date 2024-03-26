@@ -14,15 +14,19 @@ var (
 func main() {
 	flag.Parse()
 
+	// Create a new version map that maps versions to localhost addresses where
+	// the agent baker service for that version is running.
 	verMap, err := versions.New()
 	if err != nil {
 		panic(err)
 	}
 
+	// Create a new HTTP server that routes requests to the appropriate agent baker
+	// service based on the version specified in the request.
 	serv, err := http.New(verMap)
 	if err != nil {
 		panic(err)
 	}
 
-	serv.ListenAndServe(*addr)
+	panic(serv.ListenAndServe(*addr))
 }

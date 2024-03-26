@@ -1,5 +1,30 @@
-// Package versions provides agent baker version types and a mapping of versions to localhost addresses
-// that different agent baker versions are running on.
+/*
+Package versions provides agent baker version types and a mapping of versions to localhost addresses
+that different agent baker versions are running on.
+
+This package looks into the sub-directory, binaries, which contains folders named for agent baker versions.
+Inside each directory, there should be a binary called 'agentbaker' that is the agent baker binary for that version.
+This package will extract the binaries and run them on localhost on some port. It returns a mapping of the versions
+to the localhost addresses that the agent bakers are running on.
+
+If a directory has a bad version or the agent won't start, an error is returned.
+
+Usage is simple:
+
+	verMap, err := versions.New()
+	if err != nil {
+		panic(err)
+	}
+
+	// Use verMap to get the base address for a version.
+	// This can be used to send requests to the agent baker service.
+	base := verMap.Base(versions.Latest)
+	if base == "" {
+		panic("latest version not found")
+	}
+
+Substitute panics with proper error handling.
+*/
 package versions
 
 import (

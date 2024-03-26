@@ -1,5 +1,21 @@
-// Package http provides an HTTP frontend for the agent baker service. This is a simple
-// HTTP server that routes requests to the appropriate backend agent baker service.
+/*
+Package http provides an HTTP frontend for the agent baker service. This is a simple
+HTTP server that routes requests to the appropriate backend agent baker service.
+
+Usage is simple:
+
+	verMap, err := versions.New()
+	if err != nil {
+		panic(err)
+	}
+
+	serv, err := New(verMap)
+	if err != nil {
+		panic(err)
+	}
+
+	panic(serv.ListenAndServe(*addr))
+*/
 package http
 
 import (
