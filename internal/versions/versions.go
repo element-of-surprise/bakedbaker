@@ -50,6 +50,7 @@ func (v Version) validate() error {
 	return nil
 }
 
+// String implements the fmt.Stringer interface.
 func (v Version) String() string {
 	return string(v)
 }
@@ -62,6 +63,9 @@ type Mapping struct {
 	versions map[Version]string
 }
 
+// Base returns the base address where the agent baker service for the given version is running.
+// If this is empty string, the version is not found. The returned address will be in the form of
+// "http://localhost:<port>".
 func (m Mapping) Base(v Version) string {
 	return m.versions[v]
 }
