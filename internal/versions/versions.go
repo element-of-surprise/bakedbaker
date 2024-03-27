@@ -103,9 +103,14 @@ func New() (Mapping, error) {
 	return m, nil
 }
 
+type binFS interface {
+	fs.ReadDirFS
+	fs.ReadFileFS
+}
+
 // extractBinaries reads the embedded filesystem and extracts the agent baker binaries.
-func extractBinaries() ([]versionPath, error) {
-	versions, err := binariesFS.ReadDir(".")
+func extractBinaries(rdfs binFS) ([]versionPath, error) {
+	versions, err := rdfs.ReadDir(".")
 	if err != nil {
 		return nil, fmt.Errorf("could not read the versions directory: %v", err)
 	}
