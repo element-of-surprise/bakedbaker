@@ -1,5 +1,7 @@
 # Baked Baker
 
+![Mascot](https://github.com/element-of-surprise/bakedbaker/blob/main/docs/bakedbaker.jpeg)
+
 ## Introduction
 
 Baked Baker (BB) is a HTTP proxy that directs requests to Agent Baker instances at different versions.
