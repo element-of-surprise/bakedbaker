@@ -44,7 +44,7 @@ type VersionedReq[T any] struct {
 
 The call is routed to the specified version of Agent Baker.
 
-[Flow Diagram](./docs/flow-diagram.png)
+![Flow Diagram](https://github.com/element-of-surprise/bakedbaker/blob/main/docs/bakedbaker-flow.png)
 
 BB's flow is a simplistic proxy with nothing special over a regular proxy other that it routes requests to different versions of Agent Baker based on the request.
 
