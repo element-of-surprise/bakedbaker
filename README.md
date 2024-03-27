@@ -44,7 +44,7 @@ type VersionedReq[T any] struct {
 
 The call is routed to the specified version of Agent Baker.
 
-![Flow Diagram](https://github.com/element-of-surprise/bakedbaker/blob/main/docs/bakedbaker-flow.png)
+![Flow Diagram](https://github.com/element-of-surprise/bakedbaker/blob/main/docs/bakedbaker-flow.pngg)
 
 BB's flow is a simplistic proxy with nothing special over a regular proxy other that it routes requests to different versions of Agent Baker based on the request.
 
@@ -59,13 +59,15 @@ A few things will stand out in this implementation:
 
 #### GoFiber
 
-`GoFiber` is a incredibly fast framework for serving HTTP based on the `FastHTTP` package. The framework is optimized to be faster than all the web servers that Rust is producing, which makes it a good choice for a proxy.
+`GoFiber` is a incredibly fast framework for serving HTTP based on the `FastHTTP` package. The framework is optimized to be faster than Rust web servers, a testament to its speed. This makes it a good choice for a proxy where you want the proxy to be out of the way as much as possible.
 
-With that said,, it certainly can be argued that we don't require the speed of `GoFiber` for this project. However, it does have a lot of support in the community and a vast amount of middleware that can be used to extend the functionality of the proxy. In this project I only use the `compress` middleware.
+With that said,, it certainly can be argued that we don't require the speed of `GoFiber` for this project.
 
-For this project, I don't find that the standard `net/http` package is easier for people to understand (it is great, but has a learning curve for those not familiar with it).
+It does have a lot of support in the community and a vast amount of middleware that can be used to extend the functionality of the proxy.
 
-There might be good reason to try and utilize `https://pkg.go.dev/net/http/httputil#ReverseProxy` for this project. But looking at it I didn't see that this was going to be simpler or easy to extend with middleware as `GoFiber` is.
+Because we aren't using the advanced capabilities of `GoFiber`, the standard `net/http` package was not easier to understand or use. And while there are other frameworks built around `net/http` like `Gin`, they are not as fast as `GoFiber` by orders of magnitude.
+
+There might be good reason to try and utilize `https://pkg.go.dev/net/http/httputil#ReverseProxy` for this project. But looking at it I didn't see that this was going to be an easier solution.
 
 #### Variable Argument Types
 
