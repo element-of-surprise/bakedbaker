@@ -31,12 +31,13 @@ import (
 	"context"
 	"embed"
 	"fmt"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"sync/atomic"
 
-	"k8s.io/apimachinery/pkg/util/wait"
+	"github.com/gostdlib/concurrency/prim/wait"
 )
 
 //go:embed binaries
@@ -82,14 +83,14 @@ type versionPath struct {
 }
 
 // New creates a new mapping of versions to localhost addresses.
-func New() (Mapping, error) {
+func New(ctx context.Context) (Mapping, error) {
 	// TODO: Need to add some logic to find the latest version and make a mapping to that.
-	verPaths, err := extractBinaries()
+	verPaths, err := extractBinaries(binariesFS)
 	if err != nil {
 		return Mapping{}, err
 	}
 
-	if err := spawnVersions(verPaths); err != nil {
+	if err := spawnVersions(ctx, verPaths); err != nil {
 		return Mapping{}, err
 	}
 
@@ -138,7 +139,7 @@ func extractBinaries(rdfs binFS) ([]versionPath, error) {
 
 // spawnVersion takes a list of agent baker versions and the relevant binaries and runs them.
 // It modifies the versionPath slice in place to add the address of the running agent baker instances.
-func spawnVersions(verPaths []versionPath) error {
+func spawnVersions(ctx context.Context, verPaths []versionPath) error {
 	ports := atomic.Int32{}
 	ports.Store(8080)
 
@@ -150,27 +151,30 @@ func spawnVersions(verPaths []versionPath) error {
 		i := i
 		vp := vp
 
-		g.Go(func(ctx context.Context) error {
-			fp := filepath.Join(tmpdir, vp.version.String())
+		g.Go(
+			ctx,
+			func(ctx context.Context) error {
+				fp := filepath.Join(tmpdir, vp.version.String())
 
-			if err := os.WriteFile(p, vp.bin, 0755); err != nil {
-				return fmt.Errorf("could not write agentbaker binary file(%v): %v", vp.version, err)
-			}
-			port := ports.Add(1) - 1
+				if err := os.WriteFile(fp, vp.bin, 0755); err != nil {
+					return fmt.Errorf("could not write agentbaker binary file(%v): %v", vp.version, err)
+				}
+				port := ports.Add(1) - 1
 
-			vp.addr = fmt.Sprintf("http://localhost:%d", port)
+				vp.addr = fmt.Sprintf("http://localhost:%d", port)
 
-			// NOTE: We would really want to monitor the health of the binary after start. And should decide what to do
-			// if an underlying binary crashes.
-			if err := exec.Command(fp, "-port", vp.addr).Start(); err != nil {
-				return fmt.Errorf("could not start agentbaker binary(%v): %v", vp.version, err)
-			}
-			verPaths[i] = vp
-			return nil
-		})
+				// NOTE: We would really want to monitor the health of the binary after start. And should decide what to do
+				// if an underlying binary crashes.
+				if err := exec.Command(fp, "-port", vp.addr).Start(); err != nil {
+					return fmt.Errorf("could not start agentbaker binary(%v): %v", vp.version, err)
+				}
+				verPaths[i] = vp
+				return nil
+			},
+		)
 	}
 
-	if err := g.Wait(); err != nil {
+	if err := g.Wait(ctx); err != nil {
 		return err
 	}
 	return nil

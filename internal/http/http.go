@@ -127,6 +127,7 @@ func versionedRequest[T any](body []byte) (versions.Version, T, error) {
 
 		// Let's try again directly against the config.
 		if err := json.Unmarshal(body, &config); err != nil {
+			// This should actually never happen, because we already unmarshalled it.
 			return "", emptyT, fmt.Errorf("could not unmarshal our the body content to GetNodeBootstrapDataRequest: %w", err)
 		}
 		if reflect.ValueOf(config).IsZero() {
@@ -164,7 +165,7 @@ func sendToAgentBaker(c *fiber.Ctx, base string, body []byte) error {
 }
 
 func (s *Server) bootstrapData(c *fiber.Ctx) error {
-	ver, config, err := versionedRequest[datamodel.GetNodeBootstrapDataRequest](c.Body())
+	ver, config, err := versionedRequest[datamodel.NodeBootstrappingConfiguration](c.Body())
 	if err != nil {
 		return err
 	}
